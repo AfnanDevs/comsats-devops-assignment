@@ -4,8 +4,8 @@
     "description": "Simple Web App for DevOps Assignment",
     "main": "server.js",
     "scripts": {
-      "start": "node server.js",
-      "test": "jest --forceExit"
+    "start": "node server.js",
+    "test": "jest server.test.js --forceExit"
     },
     "dependencies": {
       "express": "^4.19.2",
