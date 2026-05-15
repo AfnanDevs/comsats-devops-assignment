@@ -21,17 +21,15 @@ pipeline {
         }
 
         stage('Language-Specific Unit Testing') {
-            agent {
-                docker { 
-                    image 'node:18-alpine'
-                    reuseNode true
-                }
-            }
             steps {
                 echo '=== STAGE 2: Running Node.js App Unit Tests via Jest ==='
-                // This executes directly inside the Node environment safely
-                sh 'npm install'
-                sh 'npm test'
+                // We use an internal anonymous volume so it does not rely on host path mounting
+                sh """
+                    docker run --rm \
+                    -v /var/jenkins_home/workspace/Automated-DevOps-Pipeline:/app \
+                    -w /app \
+                    node:18-alpine sh -c "npm install && npm test"
+                """
             }
         }
 
@@ -39,7 +37,10 @@ pipeline {
             steps {
                 echo '=== STAGE 3: Deploying App and Database Containers ==='
                 sh "docker run -d --name ${DB_CONTAINER} --network ${DOCKER_NETWORK} -p 27017:27017 mongo:latest"
-                sh "docker build -t devops-web-app:latest ."
+                
+                // Navigate to the correct workspace folder inside the container to build the app image
+                sh "cd /var/jenkins_home/workspace/Automated-DevOps-Pipeline && docker build -t devops-web-app:latest ."
+                
                 sh """
                     docker run -d \
                     --name ${APP_CONTAINER} \
@@ -64,7 +65,9 @@ pipeline {
                     selenium/standalone-chrome:latest
                 """
                 sh "sleep 5"
-                sh "docker build -f Dockerfile.selenium -t selenium-test-suite ."
+                
+                sh "cd /var/jenkins_home/workspace/Automated-DevOps-Pipeline && docker build -f Dockerfile.selenium -t selenium-test-suite ."
+                
                 sh """
                     docker run --rm \
                     --name ${TEST_CONTAINER} \
