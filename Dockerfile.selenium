@@ -1,30 +1,9 @@
-#1 [internal] load build definition from Dockerfile.selenium
-#1 transferring dockerfile: 40B done
-#1 DONE 0.0s
-ERROR: failed to solve: the Dockerfile cannot be empty
-[Pipeline] }
-[Pipeline] // stage
-[Pipeline] stage
-[Pipeline] { (Declarative: Post Actions)
-[Pipeline] echo
-=== Post-Execution Cleanup ===
-[Pipeline] sh
-+ docker rm -f selenium-chrome
-selenium-chrome
-[Pipeline] sh
-+ docker image rm selenium-test-suite:latest
-Error response from daemon: No such image: selenium-test-suite:latest
-+ true
-[Pipeline] echo
-PIPELINE FAILURE: One or more architectural stages broke down.
-[Pipeline] }
-[Pipeline] // stage
-[Pipeline] }
-[Pipeline] // withEnv
-[Pipeline] }
-[Pipeline] // withEnv
-[Pipeline] }
-[Pipeline] // node
-[Pipeline] End of Pipeline
-ERROR: script returned exit code 1
-Finished: FAILURE
+FROM node:18-alpine
+
+WORKDIR /usr/src/selenium
+
+RUN npm install webdriverio
+
+COPY selenium.test.js .
+
+CMD ["node", "selenium.test.js"]
